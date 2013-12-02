@@ -22,12 +22,33 @@ public final class R {
     }
     public static final class drawable {
         public static final int ic_launcher=0x7f020000;
+        public static final int icon=0x7f020001;
+        public static final int nuetral=0x7f020002;
+        public static final int off=0x7f020003;
+        public static final int on=0x7f020004;
+        public static final int yellow=0x7f020005;
     }
     public static final class id {
-        public static final int action_settings=0x7f080000;
+        public static final int action_settings=0x7f08000a;
+        public static final int details=0x7f080007;
+        public static final int external_alarms_list=0x7f080001;
+        public static final int imgIcon=0x7f080005;
+        public static final int infoIcon=0x7f080008;
+        public static final int internal_alarms_list=0x7f080002;
+        public static final int modes=0x7f080009;
+        public static final int modes_list=0x7f080003;
+        public static final int pager=0x7f080000;
+        public static final int physical_alarms_list=0x7f080004;
+        public static final int txtTitle=0x7f080006;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;
+        public static final int fragment_external_alarms=0x7f030001;
+        public static final int fragment_internal_alarms=0x7f030002;
+        public static final int fragment_modes=0x7f030003;
+        public static final int fragment_physical_alarms=0x7f030004;
+        public static final int modes_layout=0x7f030005;
+        public static final int physical_layout=0x7f030006;
     }
     public static final class menu {
         public static final int main=0x7f070000;
