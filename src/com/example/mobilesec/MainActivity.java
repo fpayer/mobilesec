@@ -1,13 +1,7 @@
 package com.example.mobilesec;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
@@ -18,27 +12,17 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.protocol.HttpContext;
 
-import android.hardware.Camera;
-import android.hardware.Camera.PictureCallback;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.util.Log;
 import android.view.Menu;
-import android.view.SurfaceView;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends Activity implements LocationListener{
@@ -56,19 +40,6 @@ public class MainActivity extends Activity implements LocationListener{
 		String provider = LocationManager.NETWORK_PROVIDER;
 		LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		locationManager.requestLocationUpdates(provider, 0, 0, this);
-
-		//LocationManager locationManger2 = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		//locationManager2
-
-		//new HttpRequestTask().execute("");
-		/*
-		try{
-			GMailSender sender = new GMailSender("Fran780@gmail.com", "test");
-			sender.sendMail("Test", "Body", "Franz780@gmail.com", "fpayer@umd.edu");
-		} catch (Exception e){
-			Log.e("SendMail", e.getMessage(), e);
-		}
-		 */
 	}
 
 
@@ -127,12 +98,6 @@ public class MainActivity extends Activity implements LocationListener{
 			Toast.makeText(MainActivity.this, "Latitude: " + latitude + ", Longitude" + longitude, Toast.LENGTH_SHORT).show();
 			lastLocation = location;
 		}
-		/*
-		new HttpRequestTask().execute("{\"lat\" : \""+latitude+"\", \"lon\" : \""+longitude+"\"}");
-		Toast.makeText(MainActivity.this, "Latitude: " + latitude + ", Longitude" + longitude, Toast.LENGTH_SHORT).show();
-*/
-
-		//Log.i("Location", "Latitude: " + latitude + ", Longitude" + longitude);
 	}
 
 
