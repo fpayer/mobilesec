@@ -320,7 +320,7 @@ ActionBar.TabListener,LocationListener{
 		// TODO Auto-generated method stub
 
 	}
-
+ 
 	@Override
 	public void onProviderEnabled(String arg0) {
 		// TODO Auto-generated method stub
