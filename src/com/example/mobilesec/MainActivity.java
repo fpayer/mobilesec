@@ -45,13 +45,14 @@ import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
-
+import android.widget.AdapterView.OnItemClickListener;
 
 public class MainActivity extends FragmentActivity implements
 ActionBar.TabListener,LocationListener{
@@ -83,7 +84,7 @@ ActionBar.TabListener,LocationListener{
 				if (mAccel>(data[3].getSensitivity()+3)) {
 					//playBeep();
 					showAlert("Accelerometer","Fired!");
-					
+
 				}
 			}
 		}
@@ -135,7 +136,7 @@ ActionBar.TabListener,LocationListener{
 			}
 		});
 	}
-
+	
 	@Override
 	public void onTabReselected(Tab tab, FragmentTransaction ft) {
 	}
@@ -149,6 +150,7 @@ ActionBar.TabListener,LocationListener{
 
 	@Override
 	public void onTabUnselected(Tab tab, FragmentTransaction ft) {
+		
 	}
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -318,19 +320,16 @@ ActionBar.TabListener,LocationListener{
 	@Override
 	public void onProviderDisabled(String arg0) {
 		// TODO Auto-generated method stub
-
 	}
- 
+
 	@Override
 	public void onProviderEnabled(String arg0) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
 		// TODO Auto-generated method stub
-
 	}
 	public void showAlert(String title, String message) {
 		if (!alertShown) {
@@ -349,6 +348,27 @@ ActionBar.TabListener,LocationListener{
 			alertShown=false;
 		}
 	}
-	
 
+	public void launchGridView(){
+		setContentView(R.layout.activity_main);
+
+		GridView gridview = (GridView) findViewById(R.id.gridview);
+		ImageAdapter myAd = new ImageAdapter(this);
+		myAd.randomizeArray( System.nanoTime() );
+		gridview.setAdapter( myAd );
+
+		gridview.setOnItemClickListener(new OnItemClickListener() {
+			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+
+				ImageView x = (ImageView) v;
+				String mystr;
+				if( x.getId() == R.drawable.sample_3 ) {
+					mystr = "Correct Selection";
+				} else {
+					mystr = "Incorrect Selection";
+				}
+				Toast.makeText(MainActivity.this, mystr, Toast.LENGTH_SHORT).show();
+			}
+		}); 
+	}
 }
