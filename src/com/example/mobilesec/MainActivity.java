@@ -84,7 +84,14 @@ ActionBar.TabListener,LocationListener{
 				if (mAccel>(data[3].getSensitivity()+3)) {
 					//playBeep();
 					showAlert("Accelerometer","Fired!");
-
+					int total = Alarm.getTriggerTotal();
+					Alarm.setTriggerTotal(total+2);
+					
+					if(total > 3 && total < 5){
+						launchGridView();
+					} else if(total > 5){
+						//TODO
+					}
 				}
 			}
 		}
@@ -136,7 +143,7 @@ ActionBar.TabListener,LocationListener{
 			}
 		});
 	}
-	
+
 	@Override
 	public void onTabReselected(Tab tab, FragmentTransaction ft) {
 	}
@@ -150,7 +157,7 @@ ActionBar.TabListener,LocationListener{
 
 	@Override
 	public void onTabUnselected(Tab tab, FragmentTransaction ft) {
-		
+
 	}
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -359,7 +366,6 @@ ActionBar.TabListener,LocationListener{
 
 		gridview.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-
 				ImageView x = (ImageView) v;
 				String mystr;
 				if( x.getId() == R.drawable.sample_3 ) {
