@@ -36,18 +36,13 @@ public class DisplayTransparentScreen extends Activity {
 		Button hiddenbutton = (Button) findViewById(R.id.buttonOK);
 		hiddenbutton.setVisibility(View.VISIBLE);
 		hiddenbutton.setBackgroundColor(Color.TRANSPARENT);
-		//hiddenbutton.setVisibility(View.INVISIBLE);
-		
+
 		hiddenbutton.setOnClickListener(new OnClickListener() {
         	public void onClick(View v) {
         		alertDialog.show();
         	}
         });
-		
-		
-		
 	}
-
 }
 
 

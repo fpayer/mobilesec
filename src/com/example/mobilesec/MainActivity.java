@@ -25,6 +25,7 @@ import android.app.DialogFragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -68,7 +69,7 @@ ActionBar.TabListener,LocationListener{
 	private float mAccel; // acceleration apart from gravity
 	private float mAccelCurrent; // current acceleration including gravity
 	private float mAccelLast; // last acceleration including gravity
-
+	private boolean gridShown=false;
 	private final SensorEventListener mSensorListener = new SensorEventListener() {
 
 		public void onSensorChanged(SensorEvent se) {
@@ -86,7 +87,7 @@ ActionBar.TabListener,LocationListener{
 					showAlert("Accelerometer","Fired!");
 					int total = Alarm.getTriggerTotal();
 					Alarm.setTriggerTotal(total+2);
-					
+
 					if(total > 3 && total < 5){
 						launchGridView();
 					} else if(total > 5){
@@ -112,9 +113,9 @@ ActionBar.TabListener,LocationListener{
 		criteria.setAccuracy(Criteria.ACCURACY_COARSE);
 		String provider = LocationManager.NETWORK_PROVIDER;
 		LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		locationManager.requestLocationUpdates(provider, 0, 0, this);		
+		locationManager.requestLocationUpdates(provider, 0, 0, this);
 		viewPager.setAdapter(mAdapter);
-		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);     
+		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 		for (String tab_name : tabs) {
 			actionBar.addTab(actionBar.newTab().setText(tab_name)
 					.setTabListener(this));
@@ -187,7 +188,7 @@ ActionBar.TabListener,LocationListener{
 			accelerometerEnabled=isEnabled;
 		} else if (s.equals("Untrusted Wifi Alarm")) {
 
-		} 
+		}
 		if (getDrawableId(icon)!= R.drawable.nuetral) {
 			showAlert(s,s+enabledString);
 		} else {
@@ -226,6 +227,7 @@ ActionBar.TabListener,LocationListener{
 		catch (Exception e) {}
 		return ((Integer)out);
 	}
+	
 	public class HttpRequestTask extends AsyncTask<String, Long, Integer>{
 
 		@Override
@@ -284,15 +286,15 @@ ActionBar.TabListener,LocationListener{
 		final Alarm a = ((Alarm)icon.getTag());
 		String title=a.getTitle();
 		String description = ((Alarm)icon.getTag()).getDescription();
-		LinearLayout linear=new LinearLayout(this); 
-		linear.setOrientation(1); 
+		LinearLayout linear=new LinearLayout(this);
+		linear.setOrientation(1);
 		final SeekBar seek=new SeekBar(this);
 		TextView textLow = new TextView(this);
 		TextView textHigh = new TextView(this);
 
 		seek.setMax(10);
 		seek.setProgress(a.getSensitivity());
-		linear.addView(seek); 
+		linear.addView(seek);
 		textLow.setText("Low Sensitivity");
 		textHigh.setText("High Sensitivity");
 		alertDialogBuilder.setView(linear);
@@ -357,24 +359,32 @@ ActionBar.TabListener,LocationListener{
 	}
 
 	public void launchGridView(){
-		setContentView(R.layout.activity_main);
+		if (!gridShown) {
+			setContentView(R.layout.image_grid);
+			GridView gridview = (GridView) findViewById(R.id.gridview);
+			ImageAdapter myAd = new ImageAdapter(this);
+			myAd.randomizeArray( System.nanoTime() );
+			gridview.setAdapter( myAd );
 
-		GridView gridview = (GridView) findViewById(R.id.gridview);
-		ImageAdapter myAd = new ImageAdapter(this);
-		myAd.randomizeArray( System.nanoTime() );
-		gridview.setAdapter( myAd );
+			gridview.setOnItemClickListener(new OnItemClickListener() {
+				public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
 
-		gridview.setOnItemClickListener(new OnItemClickListener() {
-			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-				ImageView x = (ImageView) v;
-				String mystr;
-				if( x.getId() == R.drawable.sample_3 ) {
-					mystr = "Correct Selection";
-				} else {
-					mystr = "Incorrect Selection";
+					ImageView x = (ImageView) v;
+					String mystr;
+					if( x.getId() == R.drawable.sample_3 ) {
+						mystr = "Correct Selection";
+					} else {
+						mystr = "Incorrect Selection";
+					}
+					Toast.makeText(MainActivity.this, mystr, Toast.LENGTH_SHORT).show();
 				}
-				Toast.makeText(MainActivity.this, mystr, Toast.LENGTH_SHORT).show();
-			}
-		}); 
+			});
+			DialogFragment newFragment = ImageGridViewDialogFragment.newInstance();
+			newFragment.show(getFragmentManager(), "dialog");
+			newFragment.setStyle(DialogFragment.STYLE_NORMAL, DialogFragment.TRIM_MEMORY_RUNNING_LOW);
+			gridShown=true;
+		} else {
+			gridShown=false;
+		}
 	}
 }
