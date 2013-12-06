@@ -70,6 +70,8 @@ ActionBar.TabListener,LocationListener{
 	private float mAccelCurrent; // current acceleration including gravity
 	private float mAccelLast; // last acceleration including gravity
 	private boolean gridShown=false;
+	//static boolean reauthOpen = false;
+	static DialogFragment newFragment = null;
 	private final SensorEventListener mSensorListener = new SensorEventListener() {
 
 		public void onSensorChanged(SensorEvent se) {
@@ -84,7 +86,7 @@ ActionBar.TabListener,LocationListener{
 				mAccel = mAccel * 0.9f + delta; // perform low-cut filter
 				if (mAccel>(data[3].getSensitivity()+3)) {
 					//playBeep();
-					showAlert("Accelerometer","Fired!");
+					//showAlert("Accelerometer","Fired!");
 					int total = Alarm.getTriggerTotal();
 					Alarm.setTriggerTotal(total+2);
 
@@ -93,6 +95,7 @@ ActionBar.TabListener,LocationListener{
 					} else if(total > 5){
 						//TODO
 					}
+
 				}
 			}
 		}
@@ -227,7 +230,7 @@ ActionBar.TabListener,LocationListener{
 		catch (Exception e) {}
 		return ((Integer)out);
 	}
-	
+
 	public class HttpRequestTask extends AsyncTask<String, Long, Integer>{
 
 		@Override
@@ -360,26 +363,7 @@ ActionBar.TabListener,LocationListener{
 
 	public void launchGridView(){
 		if (!gridShown) {
-			setContentView(R.layout.image_grid);
-			GridView gridview = (GridView) findViewById(R.id.gridview);
-			ImageAdapter myAd = new ImageAdapter(this);
-			myAd.randomizeArray( System.nanoTime() );
-			gridview.setAdapter( myAd );
-
-			gridview.setOnItemClickListener(new OnItemClickListener() {
-				public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-
-					ImageView x = (ImageView) v;
-					String mystr;
-					if( x.getId() == R.drawable.sample_3 ) {
-						mystr = "Correct Selection";
-					} else {
-						mystr = "Incorrect Selection";
-					}
-					Toast.makeText(MainActivity.this, mystr, Toast.LENGTH_SHORT).show();
-				}
-			});
-			DialogFragment newFragment = ImageGridViewDialogFragment.newInstance();
+			newFragment = ImageGridViewDialogFragment.newInstance();
 			newFragment.show(getFragmentManager(), "dialog");
 			newFragment.setStyle(DialogFragment.STYLE_NORMAL, DialogFragment.TRIM_MEMORY_RUNNING_LOW);
 			gridShown=true;
