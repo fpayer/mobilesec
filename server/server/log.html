@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Simple Log</title>
+    <meta charset="utf-8">
+    <link type="text/css" rel="stylesheet" href="/admin/css/jquery.terminal.css" />
+    <script type="text/javascript" src="/admin/js/jquery-1.9.1.js"></script>
+    <script type="text/javascript" src="/admin/js/jquery.terminal-min.js"></script>
+    <script>
+        $(document).ready(function(){
+                $('#logs').terminal(function(command, term) {
+                        term.clear();
+                    term.insert(command);
+                    term.next();
+                }, {
+                    greetings: "",
+                    name: "logs",
+                    height: 800,
+                    width: 760,
+                    prompt: '',
+            });
+
+            $('#logs').terminal().enable(); 
+            var seen = [];
+
+            var load = function(data){
+                resp = JSON.parse(data);
+                for (var x = 0; x<resp.length;x++){
+                    var date = new Date(resp[x].date);
+                    var message = date.toLocaleDateString() + date.toLocaleTimeString().replace(" ","")  + ": " + resp[x].event + " - " + resp[x].level;
+                    if(seen.indexOf(message) == -1){
+                        $("#logs").terminal().echo(message);
+                        seen.push(message);
+                    }
+                }
+
+            };
+
+            setInterval(function(){$.get("/logdata", {}, load)}, 500);
+        });
+    </script>
+  </head>
+  <body style="background:black">
+    <div height="100%" width:"100%" id="logs"></div>
+  </body>
+</html>

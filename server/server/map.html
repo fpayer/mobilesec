@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Simple Map</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <style>
+      html, body, #map-canvas {
+        height: 100%;
+        margin: 0px;
+        padding: 0px
+      }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+    <script>
+    
+    function xhrRequest(url, method, data, callback){
+        var xhr = new XMLHttpRequest()
+
+        console.log("Loading: ", url);
+
+        if(method == "POST"){
+            xhr.open(method, url, true)
+            xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded")
+            xhr.send(data)
+        } else {
+            if(url.match(/\?/))
+                xhr.open(method, url+'&'+data, true)
+            else
+                xhr.open(method, url+'?'+data, true)
+            xhr.send()
+        }
+
+        xhr.onreadystatechange = function(){
+            if(xhr.readyState == 4){
+                console.log("Response on "+url+" :", xhr)
+                callback(xhr)
+            }
+        }
+    }
+    
+    var map;
+    var path;
+    var coords = [];
+    var markers = [];
+    var REDPUSH = "http://www.google.com/intl/en_us/mapfiles/ms/micons/red-dot.png";
+    var BLUEPUSH = "http://www.google.com/intl/en_us/mapfiles/ms/micons/blue-dot.png";
+    var GREENPUSH = "http://www.google.com/intl/en_us/mapfiles/ms/micons/green-dot.png";
+    function addMarker(lat, lng, dateString, opts){
+        var opts = opts || { };
+        opts.position = new google.maps.LatLng(lat, lng);
+        opts.map = map;
+        opts.lat = lat;
+        opts.lng = lng;
+        var marker = new google.maps.Marker(opts);
+        
+        var content = "<p>"+dateString+"</p>";
+
+        var infowindow = new google.maps.InfoWindow({
+            content : content
+        });
+
+        google.maps.event.addListener(marker, "click", function() {
+            infowindow.open(map, marker);
+        });
+        
+        marker.setMap(map);
+        coords.push(opts.position);
+        markers.push(marker);
+    }
+
+    function colorMarkers(){
+        markers[0].setIcon(GREENPUSH);
+        markers[markers.length-1].setIcon(BLUEPUSH);
+    }
+
+    function initialize() {
+        var mapOptions = {
+            zoom: 13,
+            center: new google.maps.LatLng(38.989836, -76.938313),
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        };
+        map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+    
+        xhrRequest("/cords", "GET", "", function(xhr){
+            resp = JSON.parse(xhr.responseText);
+            results = resp;
+            for (i=0; i<results.length; i++){
+                addMarker(results[i].lat, results[i].lng, results[i].date);
+            }
+            path = new google.maps.Polyline({
+                path: coords,
+                strokeColor: "#FF0000",
+                strokeOpacity: 1.0,
+                strokeWeight: 2 
+            });
+            path.setMap(map);
+            colorMarkers();
+        });
+    }
+    google.maps.event.addDomListener(window, 'load', initialize);
+    </script>
+  </head>
+  <body>
+    <div id="map-canvas"></div>
+  </body>
+</html>
