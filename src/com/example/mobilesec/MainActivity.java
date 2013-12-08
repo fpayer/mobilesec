@@ -1,22 +1,9 @@
 package com.example.mobilesec;
 
-
-import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 
 import com.example.mobilesec.MainActivity;
-import com.example.mobilesec.MainActivity.HttpRequestTask;
+import com.example.mobilesec.HttpGPSPostTask;
 
 import android.app.ActionBar;
 import android.app.AlertDialog;
@@ -25,7 +12,6 @@ import android.app.DialogFragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -35,25 +21,16 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
-import android.media.ToneGenerator;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
-import android.widget.AdapterView.OnItemClickListener;
 
 public class MainActivity extends FragmentActivity implements
 ActionBar.TabListener,LocationListener{
@@ -65,18 +42,117 @@ ActionBar.TabListener,LocationListener{
 	private boolean gpsEnabled=false, accelerometerEnabled=false;
 	// Tab titles
 	private String[] tabs = { "Physical", "Internal", "External" };
+
+
+	//Sensors
 	private SensorManager mSensorManager;
 	private float mAccel; // acceleration apart from gravity
 	private float mAccelCurrent; // current acceleration including gravity
 	private float mAccelLast; // last acceleration including gravity
+	/** Minimum movement force to consider. */
+	private static final int MIN_FORCE = 10;
+	/**
+	 * Minimum times in a shake gesture that the direction of movement needs to
+	 * change.
+	 */
+	private static final int MIN_DIRECTION_CHANGE = 3;
+	/** Maximum pause between movements. */
+	private static final int MAX_PAUSE_BETHWEEN_DIRECTION_CHANGE = 200;
+	/** Maximum allowed time for shake gesture. */
+	private static final int MAX_TOTAL_DURATION_OF_SHAKE = 400;
+	/** Time when the gesture started. */
+	private long mFirstDirectionChangeTime = 0;
+	/** Time when the last movement started. */
+	private long mLastDirectionChangeTime;
+	/** How many movements are considered so far. */
+	private int mDirectionChangeCount = 0;
+	/** The last x position. */
+	private float lastX = 0;
+	/** The last y position. */
+	private float lastY = 0;
+	/** The last z position. */
+	private float lastZ = 0;
+	/** The last time alarm was fired */
+	private long lastTime = 0;
+
+	//Here be static variables. Beware
 	static boolean gridShown=false;
-	//static boolean reauthOpen = false;
 	static DialogFragment newFragment = null;
+
 	private final SensorEventListener mSensorListener = new SensorEventListener() {
 
+		/**
+		 * Resets the shake parameters to their default values.
+		 */
+		private void resetShakeParameters() {
+			mFirstDirectionChangeTime = 0;
+			mDirectionChangeCount = 0;
+			mLastDirectionChangeTime = 0;
+			lastX = 0;
+			lastY = 0;
+			lastZ = 0;
+		}
+
 		public void onSensorChanged(SensorEvent se) {
-			Alarm[] data = ((AlarmFragment)mAdapter.getItem(mAdapter.currentPosition)).getData();
 			if (accelerometerEnabled) {
+				float x = se.values[SensorManager.DATA_X];
+				float y = se.values[SensorManager.DATA_Y];
+				float z = se.values[SensorManager.DATA_Z];
+
+				// calculate movement
+				float totalMovement = Math.abs(x + y + z - lastX - lastY - lastZ);
+
+				if (totalMovement > MIN_FORCE) {
+
+					// get time
+					long now = System.currentTimeMillis();
+
+					// store first movement time
+					if (mFirstDirectionChangeTime == 0) {
+						mFirstDirectionChangeTime = now;
+						mLastDirectionChangeTime = now;
+					}
+
+					// check if the last movement was not long ago
+					long lastChangeWasAgo = now - mLastDirectionChangeTime;
+					if (lastChangeWasAgo < MAX_PAUSE_BETHWEEN_DIRECTION_CHANGE) {
+
+						// store movement data
+						mLastDirectionChangeTime = now;
+						mDirectionChangeCount++;
+
+						// store last sensor data 
+						lastX = x;
+						lastY = y;
+						lastZ = z;
+
+						// check how many movements are so far
+						if (mDirectionChangeCount >= MIN_DIRECTION_CHANGE) {
+
+							// check total duration
+							long totalDuration = now - mFirstDirectionChangeTime;
+							if (totalDuration < MAX_TOTAL_DURATION_OF_SHAKE && now - lastTime > 1000 && !gridShown) {
+								lastTime = now;
+								Alarm.setTriggerTotal(Alarm.getTriggerTotal()+2);
+								int total = Alarm.getTriggerTotal();
+								new HttpStatusPostTask().execute("{\"event\" : \""+"Accelerometer Alarm"+"\", \"level\" : \""+Alarm.getTriggerTotal()+"\"}");
+
+								if(total >0 && total < 5){
+									launchGridView();
+								} else if(total >= 5){
+									launchGridView();
+									//TODO
+								}
+								resetShakeParameters();
+							}
+						}
+
+					} else {
+						resetShakeParameters();
+					}
+				}
+
+				/*
 				float x = se.values[0];
 				float y = se.values[1];
 				float z = se.values[2];
@@ -86,20 +162,19 @@ ActionBar.TabListener,LocationListener{
 				mAccel = mAccel * 0.9f + delta; // perform low-cut filter
 				if(data[3] == null)
 					return;
-				if (mAccel>(data[3].getSensitivity()+3)) {
-					//playBeep();
-					//showAlert("Accelerometer","Fired!");
+				if (mAccel>(data[3].getSensitivity()+3) && !gridShown) {
 					int total = Alarm.getTriggerTotal();
 					Alarm.setTriggerTotal(total+2);
+					new HttpStatusPostTask().execute("{\"event\" : \""+"Accelerometer Alarm"+"\", \"level\" : \""+Alarm.getTriggerTotal()+"\"}");
 
 					if(total > 3 && total < 5){
 						launchGridView();
-					} else if(total > 5){
+					} else if(total >= 5){
 						launchGridView();
 						//TODO
 					}
-
 				}
+				 */
 			}
 		}
 
@@ -234,38 +309,7 @@ ActionBar.TabListener,LocationListener{
 		return ((Integer)out);
 	}
 
-	public class HttpRequestTask extends AsyncTask<String, Long, Integer>{
 
-		@Override
-		protected Integer doInBackground(String... coordinates) {
-			HttpClient client = new DefaultHttpClient();
-			HttpPost post = new HttpPost("http://162.243.27.156/gps");
-			try {
-				List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-				nameValuePairs.add(new BasicNameValuePair("json", (String)coordinates[0]));
-
-				post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-
-				// Execute HTTP Post Request
-				HttpResponse response = client.execute(post);
-				System.out.println("=======RESPONSE: " + response + " =========");
-
-			} catch (ClientProtocolException e) {
-				System.out.println("CLIENT PROTOCOL EXCEPTION: " + e);
-			} catch (IOException e) {
-				System.out.println("IO EXCEPTION: " + e);
-			}
-			return Integer.valueOf(0);
-		}
-
-		protected void onProgressUpdate(Integer... progress) {
-
-		}
-
-		protected void onPostExecute(Long result) {
-		}
-
-	}
 
 	@Override
 	public void onLocationChanged(Location location) {
@@ -280,8 +324,8 @@ ActionBar.TabListener,LocationListener{
 			}
 		}
 		if(lastLocation == null || location.distanceTo(lastLocation) > 25){
-			new HttpRequestTask().execute("{\"lat\" : \""+latitude+"\", \"lon\" : \""+longitude+"\"}");
-			Toast.makeText(MainActivity.this, "Latitude: " + latitude + ", Longitude" + longitude, Toast.LENGTH_SHORT).show();
+			new HttpGPSPostTask().execute("{\"lat\" : \""+latitude+"\", \"lon\" : \""+longitude+"\"}");
+			//Toast.makeText(MainActivity.this, "Latitude: " + latitude + ", Longitude" + longitude, Toast.LENGTH_SHORT).show();
 			lastLocation = location;
 		}
 	}
@@ -363,7 +407,7 @@ ActionBar.TabListener,LocationListener{
 			alertShown=false;
 		}
 	}
-	
+
 	public void launchGridView(){
 		if (!gridShown) {
 			gridShown = true;

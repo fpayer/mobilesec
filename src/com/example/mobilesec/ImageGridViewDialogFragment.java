@@ -43,19 +43,20 @@ public class ImageGridViewDialogFragment extends DialogFragment {
 		gridview.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
 				ImageView x = (ImageView) v;
-			
 				if( x.getId() == R.drawable.sample_3 ) {
+					Alarm.setTriggerTotal(0);
+					new HttpStatusPostTask().execute("{\"event\" : \""+"Grid Reauth Passed"+"\", \"level\" : \""+Alarm.getTriggerTotal()+"\"}");
 					Toast.makeText(getActivity(), "Correct Selection", Toast.LENGTH_SHORT).show();
-					MainActivity.gridShown = false;
-					MainActivity.newFragment.dismiss();
 				} else {
+					Alarm.setTriggerTotal(Alarm.getTriggerTotal() + 3);
+					new HttpStatusPostTask().execute("{\"event\" : \""+"Grid Reauth Failed"+"\", \"level\" : \""+Alarm.getTriggerTotal()+"\"}");
 					Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 					Ringtone r = RingtoneManager.getRingtone(getActivity().getApplicationContext(), notification);
 					r.play();
-					MainActivity.gridShown = false;
-					MainActivity.newFragment.dismiss();
-					//mystr = "Incorrect Selection";
+					new HttpStatusPostTask().execute("{\"event\" : \""+"Audible Alarm Fired"+"\", \"level\" : \""+Alarm.getTriggerTotal()+"\"}");
 				}
+				MainActivity.gridShown = false;
+				MainActivity.newFragment.dismiss();
 			}
 		});
         return v;
