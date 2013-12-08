@@ -1,6 +1,9 @@
 package com.example.mobilesec;
 
 import android.app.DialogFragment;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,14 +44,20 @@ public class ImageGridViewDialogFragment extends DialogFragment {
 			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
 
 				ImageView x = (ImageView) v;
-				String mystr;
+				//String mystr;
 				if( x.getId() == R.drawable.sample_3 ) {
-					mystr = "Correct Selection";
+					//mystr = "Correct Selection";
+					MainActivity.gridShown = false;
 					MainActivity.newFragment.dismiss();
 				} else {
-					mystr = "Incorrect Selection";
+					Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+					Ringtone r = RingtoneManager.getRingtone(getActivity().getApplicationContext(), notification);
+					r.play();
+					MainActivity.gridShown = false;
+					MainActivity.newFragment.dismiss();
+					//mystr = "Incorrect Selection";
 				}
-				Toast.makeText(getActivity(), mystr, Toast.LENGTH_SHORT).show();
+				//Toast.makeText(getActivity(), mystr, Toast.LENGTH_SHORT).show();
 			}
 		});
         return v;

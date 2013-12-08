@@ -69,7 +69,7 @@ ActionBar.TabListener,LocationListener{
 	private float mAccel; // acceleration apart from gravity
 	private float mAccelCurrent; // current acceleration including gravity
 	private float mAccelLast; // last acceleration including gravity
-	private boolean gridShown=false;
+	static boolean gridShown=false;
 	//static boolean reauthOpen = false;
 	static DialogFragment newFragment = null;
 	private final SensorEventListener mSensorListener = new SensorEventListener() {
@@ -84,6 +84,8 @@ ActionBar.TabListener,LocationListener{
 				mAccelCurrent = (float) Math.sqrt((double) (x*x + y*y + z*z));
 				float delta = mAccelCurrent - mAccelLast;
 				mAccel = mAccel * 0.9f + delta; // perform low-cut filter
+				if(data[3] == null)
+					return;
 				if (mAccel>(data[3].getSensitivity()+3)) {
 					//playBeep();
 					//showAlert("Accelerometer","Fired!");
@@ -93,6 +95,7 @@ ActionBar.TabListener,LocationListener{
 					if(total > 3 && total < 5){
 						launchGridView();
 					} else if(total > 5){
+						launchGridView();
 						//TODO
 					}
 
@@ -360,15 +363,13 @@ ActionBar.TabListener,LocationListener{
 			alertShown=false;
 		}
 	}
-
+	
 	public void launchGridView(){
 		if (!gridShown) {
+			gridShown = true;
 			newFragment = ImageGridViewDialogFragment.newInstance();
 			newFragment.show(getFragmentManager(), "dialog");
 			newFragment.setStyle(DialogFragment.STYLE_NORMAL, DialogFragment.TRIM_MEMORY_RUNNING_LOW);
-			gridShown=true;
-		} else {
-			gridShown=false;
-		}
+		} 
 	}
 }
