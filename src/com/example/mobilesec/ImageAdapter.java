@@ -13,7 +13,15 @@ import android.widget.GridView;
 import android.widget.ImageView;
 
 public class ImageAdapter extends BaseAdapter{
-
+	private Integer[] mThumbIds = {
+			R.drawable.sample_2, R.drawable.sample_3,
+			R.drawable.sample_4, R.drawable.sample_5,
+			R.drawable.sample_6, R.drawable.sample_7,
+			R.drawable.sample_0, R.drawable.sample_1,
+			R.drawable.sample_2, R.drawable.sample_3,
+			R.drawable.sample_4, R.drawable.sample_5,
+		
+	};
 	private Context mContext;
 
 	public ImageAdapter(Context c) {
@@ -44,9 +52,9 @@ public class ImageAdapter extends BaseAdapter{
 		ImageView imageView;
 		if (convertView == null) {  // if it's not recycled, initialize some attributes
 			imageView = new ImageView(mContext);
-			imageView.setLayoutParams(new GridView.LayoutParams(285, 285));
+			imageView.setLayoutParams(new GridView.LayoutParams(375, 375));
 			imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-			imageView.setPadding(8, 8, 8, 8);
+			imageView.setPadding(2, 2, 2, 2);
 		} else {
 			imageView = (ImageView) convertView;
 		}
@@ -55,19 +63,16 @@ public class ImageAdapter extends BaseAdapter{
 		imageView.setId( mThumbIds[position] );
 		return imageView;
 	}
-
-	// references to our images
-	private Integer[] mThumbIds = {
-			R.drawable.sample_2, R.drawable.sample_3,
-			R.drawable.sample_4, R.drawable.sample_5,
-			R.drawable.sample_6, R.drawable.sample_7,
-			R.drawable.sample_0, R.drawable.sample_1,
-			R.drawable.sample_2, R.drawable.sample_3,
-			R.drawable.sample_4, R.drawable.sample_5,
-			R.drawable.sample_6, R.drawable.sample_7,
-			R.drawable.sample_0, R.drawable.sample_1,
-			R.drawable.sample_2, R.drawable.sample_3,
-			R.drawable.sample_4, R.drawable.sample_5,
-			R.drawable.sample_6, R.drawable.sample_7
-	};
+	private void configureArray() {
+		mThumbIds= new Integer[12];
+		mThumbIds[0]=R.drawable.sample_0;
+		mThumbIds[1]=R.drawable.sample_1;
+		mThumbIds[2]=R.drawable.sample_2;
+		mThumbIds[3]=R.drawable.sample_3;
+		mThumbIds[4]=R.drawable.sample_4;
+		mThumbIds[5]=R.drawable.sample_5;
+		mThumbIds[6]=R.drawable.sample_6;
+		mThumbIds[7]=R.drawable.sample_7;
+		
+	}
 }
