@@ -21,8 +21,9 @@ public class HttpGPSPostTask extends AsyncTask<String, Long, Integer>{
 			HttpClient client = new DefaultHttpClient();
 			HttpPost post = new HttpPost("http://162.243.27.156/gps");
 			try {
+				String json = (String)coordinates[0].replace("\"}", "\", \"device\" : \"" + MainActivity.getDeviceId() + "\"}");
 				List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-				nameValuePairs.add(new BasicNameValuePair("json", (String)coordinates[0]));
+				nameValuePairs.add(new BasicNameValuePair("json", json));
 
 				post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 

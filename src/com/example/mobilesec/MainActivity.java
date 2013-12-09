@@ -21,6 +21,8 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
@@ -78,6 +80,7 @@ ActionBar.TabListener,LocationListener{
 	//Here be static variables. Beware
 	static boolean gridShown=false;
 	static DialogFragment newFragment = null;
+	static WifiManager wm = null;
 
 	private final SensorEventListener mSensorListener = new SensorEventListener() {
 
@@ -151,30 +154,6 @@ ActionBar.TabListener,LocationListener{
 						resetShakeParameters();
 					}
 				}
-
-				/*
-				float x = se.values[0];
-				float y = se.values[1];
-				float z = se.values[2];
-				mAccelLast = mAccelCurrent;
-				mAccelCurrent = (float) Math.sqrt((double) (x*x + y*y + z*z));
-				float delta = mAccelCurrent - mAccelLast;
-				mAccel = mAccel * 0.9f + delta; // perform low-cut filter
-				if(data[3] == null)
-					return;
-				if (mAccel>(data[3].getSensitivity()+3) && !gridShown) {
-					int total = Alarm.getTriggerTotal();
-					Alarm.setTriggerTotal(total+2);
-					new HttpStatusPostTask().execute("{\"event\" : \""+"Accelerometer Alarm"+"\", \"level\" : \""+Alarm.getTriggerTotal()+"\"}");
-
-					if(total > 3 && total < 5){
-						launchGridView();
-					} else if(total >= 5){
-						launchGridView();
-						//TODO
-					}
-				}
-				 */
 			}
 		}
 
@@ -187,6 +166,8 @@ ActionBar.TabListener,LocationListener{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
+		wm = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+		
 		viewPager = (ViewPager) findViewById(R.id.pager);
 		actionBar = getActionBar();
 		mAdapter = new TabsPagerAdapter(getSupportFragmentManager());
@@ -415,5 +396,10 @@ ActionBar.TabListener,LocationListener{
 			newFragment.show(getFragmentManager(), "dialog");
 			newFragment.setStyle(DialogFragment.STYLE_NORMAL, DialogFragment.TRIM_MEMORY_RUNNING_LOW);
 		} 
+	}
+	
+	public static String getDeviceId(){
+		WifiInfo info = MainActivity.wm.getConnectionInfo();
+		return info.getMacAddress().toUpperCase() + "@" + info.getSSID().replace("\"", "");
 	}
 }

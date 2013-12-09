@@ -20,16 +20,18 @@ public class HttpStatusPostTask extends AsyncTask<String, Long, Integer>{
 		protected Integer doInBackground(String... status) {
 			HttpClient client = new DefaultHttpClient();
 			HttpPost post = new HttpPost("http://162.243.27.156/status");
+			
 			try {
-				List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-				nameValuePairs.add(new BasicNameValuePair("json", (String)status[0]));
-
+				List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(3);
+				
+				String json = (String)status[0].replace("\"}", "\", \"device\" : \"" + MainActivity.getDeviceId() + "\"}");
+				
+				nameValuePairs.add(new BasicNameValuePair("json", json));
+				
 				post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
 				// Execute HTTP Post Request
 				HttpResponse response = client.execute(post);
-				System.out.println("=======RESPONSE: " + response + " =========");
-
 			} catch (ClientProtocolException e) {
 				System.out.println("CLIENT PROTOCOL EXCEPTION: " + e);
 			} catch (IOException e) {
